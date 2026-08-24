@@ -1,0 +1,11 @@
+.env
+.env.*
+!.env.example
+runtime/
+artifacts/
+*.log
+auth.json
+**/auth.json
+**/secrets.env
+**/.codex/
+**/himalaya/config.toml

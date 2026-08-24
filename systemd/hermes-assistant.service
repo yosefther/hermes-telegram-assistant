@@ -1,0 +1,21 @@
+[Unit]
+Description=Hermes secure personal assistant gateway (rootless Podman)
+Documentation=https://hermes-agent.nousresearch.com/docs/user-guide/messaging
+Wants=network-online.target
+After=network-online.target
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/bash "/home/user/Projects/personal assesteant/scripts/run-container.sh"
+ExecStop=-/usr/bin/podman stop --time 30 hermes-assistant
+Restart=always
+RestartSec=10
+TimeoutStartSec=180
+TimeoutStopSec=45
+KillMode=mixed
+SyslogIdentifier=hermes-assistant
+
+[Install]
+WantedBy=default.target

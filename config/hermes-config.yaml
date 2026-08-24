@@ -1,0 +1,120 @@
+_config_version: 38
+
+model:
+  provider: openai-codex
+  default: gpt-5.5
+
+terminal:
+  backend: local
+  cwd: /workspace/projects/personal assesteant
+  timeout: 300
+  home_mode: auto
+
+browser:
+  backend: browser-use
+  inactivity_timeout: 120
+  command_timeout: 30
+  headed: false
+  allow_private_urls: false
+  auto_local_for_private_urls: false
+  restrict_evaluate: true
+  dialog_policy: must_respond
+  dialog_timeout_s: 300
+  extension_control:
+    enabled: false
+  camofox:
+    managed_persistence: true
+
+memory:
+  memory_enabled: true
+  user_profile_enabled: true
+  memory_char_limit: 12000
+  user_char_limit: 8000
+  nudge_interval: 10
+
+session_reset:
+  mode: idle
+  idle_minutes: 1440
+  at_hour: 4
+
+max_concurrent_sessions: 1
+group_sessions_per_user: true
+unauthorized_dm_behavior: ignore
+
+telegram:
+  require_mention: true
+  exclusive_bot_mentions: true
+
+discord:
+  require_mention: true
+  allowed_channels: "1526329114116620538,1505948082041393274,793911791553609769"
+  free_response_channels: ""
+  history_backfill: false
+  missed_message_backfill:
+    enabled: false
+
+platform_toolsets:
+  cli:
+    - web
+    - browser
+    - terminal
+    - file
+    - skills
+    - todo
+    - memory
+    - session_search
+    - clarify
+    - delegation
+    - cronjob
+  telegram:
+    - web
+    - browser
+    - terminal
+    - file
+    - skills
+    - todo
+    - memory
+    - session_search
+    - clarify
+    - delegation
+    - cronjob
+    - vision
+    - stt
+  discord:
+    - web
+    - memory
+    - session_search
+    - clarify
+
+agent:
+  max_turns: 60
+  verbose: false
+  reasoning_effort: medium
+
+code_execution:
+  timeout: 60
+  max_tool_calls: 20
+
+delegation:
+  max_iterations: 40
+
+tool_loop_guardrails:
+  warnings_enabled: true
+  hard_stop_enabled: true
+  warn_after:
+    exact_failure: 2
+    same_tool_failure: 3
+    idempotent_no_progress: 3
+  hard_stop_after:
+    exact_failure: 4
+    same_tool_failure: 5
+    idempotent_no_progress: 5
+
+streaming:
+  enabled: true
+
+telemetry:
+  shared_metrics:
+    enabled: false
+
+timezone: Asia/Amman
