@@ -52,7 +52,7 @@ There's no application code here, only config and shell scripts around the upstr
 The container is the real boundary. Prompt rules and approval prompts are extra layers on top. More detail in [SECURITY.md](SECURITY.md).
 
 - **Rootless Podman.** Runs in a user namespace (`--userns=keep-id`) with `--cap-drop=ALL`, only the few capabilities the image needs at init, `no-new-privileges`, 1 CPU, 5 GB memory and 256 processes.
-- **One projects folder.** Only `~/Projects` is mounted read/write (as `/workspace/projects`), plus the assistant's own data and export folders. The rest of `$HOME`, `~/.ssh`, browser profiles and any host Hermes/Codex installs are not mounted.
+- **One projects folder.** Only the folder that contains this repo (`~/Projects` for me) is mounted read/write (as `/workspace/projects`), plus the assistant's own data and export folders. The rest of `$HOME`, `~/.ssh`, browser profiles and any host Hermes/Codex installs are not mounted.
 - **systemd user service.** `hermes-assistant.service` runs as my user, not root, always restarts (`Restart=always`) and logs to journald. Lingering keeps it up after reboot.
 - **Emergency stop.** `./scripts/emergency-stop.sh` stops the service and the container. `systemctl --user disable hermes-assistant.service` keeps it from coming back.
 - **Credentials.** Everything lives in `~/.local/share/hermes-assistant/` (`.env` and `auth.json` are `0600`, the Codex dir is `0700`). The Telegram token is read with a hidden prompt and never printed. OAuth uses device codes. Nothing secret goes in the repo. `.env.example` only lists empty variable names.
@@ -64,7 +64,7 @@ There's no automated test suite. [TESTING.md](TESTING.md) is a manual checklist 
 
 ## Limitations
 
-- Paths are hardcoded to `/home/user/Projects/personal assesteant` in `bootstrap.sh`, the container scripts and the systemd unit. A clone anywhere else (including one named after this repo) is refused until those are changed.
+- Everything next to this repo in its parent folder is visible to the agent, so keep that folder to projects only.
 - Discord and email are configured but turned off until their approval checks are verified.
 
 ## License
