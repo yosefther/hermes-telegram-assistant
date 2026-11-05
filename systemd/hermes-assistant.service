@@ -8,7 +8,8 @@ StartLimitBurst=5
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/bash "/home/user/Projects/personal assesteant/scripts/run-container.sh"
+# bootstrap.sh replaces @PROJECT_DIR@ with the path of this repo when it installs the unit.
+ExecStart=/usr/bin/bash "@PROJECT_DIR@/scripts/run-container.sh"
 ExecStop=-/usr/bin/podman stop --time 30 hermes-assistant
 Restart=always
 RestartSec=10

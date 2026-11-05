@@ -6,7 +6,7 @@ model:
 
 terminal:
   backend: local
-  cwd: /workspace/projects/personal assesteant
+  cwd: /workspace/projects/@REPO_FOLDER@  # bootstrap.sh fills in the repo folder name
   timeout: 300
   home_mode: auto
 
@@ -47,7 +47,8 @@ telegram:
 
 discord:
   require_mention: true
-  allowed_channels: "1526329114116620538,1505948082041393274,793911791553609769"
+  # Channel IDs are set with DISCORD_ALLOWED_CHANNELS in ~/.local/share/hermes-assistant/.env
+  allowed_channels: ""
   free_response_channels: ""
   history_backfill: false
   missed_message_backfill:
