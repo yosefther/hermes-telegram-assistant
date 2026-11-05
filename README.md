@@ -2,11 +2,6 @@
 
 My setup for running [Hermes Agent](https://hermes-agent.nousresearch.com/) as a personal assistant I talk to over Telegram. It runs the official Hermes image in rootless Podman and can work on files in my projects folder, but nothing else in my home directory.
 
-TODO(yosef): one line on why you built it.
-
-![demo](docs/demo.gif)
-<!-- TODO(yosef): record GIF -->
-
 ## How to run it
 
 You need Ubuntu/Debian (the install script uses `apt-get`), a Telegram bot token and an OpenAI account for Codex OAuth.
