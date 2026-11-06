@@ -2,11 +2,10 @@
 set -euo pipefail
 
 assistant_data_dir="${XDG_DATA_HOME:-$HOME/.local/share}/hermes-assistant"
-approved_projects_root="/home/user/Projects"
-assistant_project_dir="/workspace/projects/personal assesteant"
+source "$(dirname "${BASH_SOURCE[0]}")/paths.sh"
 assistant_export_dir="$assistant_data_dir/exports"
 assistant_image="docker.io/nousresearch/hermes-agent:latest"
-runtime_env_file="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/config/runtime.env"
+runtime_env_file="$project_dir/config/runtime.env"
 
 test -d "$assistant_data_dir"
 test -d "$approved_projects_root"

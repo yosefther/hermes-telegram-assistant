@@ -1,6 +1,6 @@
 # Security Model
 
-Hermes runs as an unprivileged user inside a rootless Podman user namespace. The container receives only three writable bind mounts: its dedicated state directory, the explicitly approved `/home/user/Projects` tree, and an export directory. The projects tree is available at `/workspace/projects`, including all of its files and subdirectories. The rest of the host home directory, browser profile, SSH directory, and existing Hermes/Codex installations are not mounted.
+Hermes runs as an unprivileged user inside a rootless Podman user namespace. The container receives only three writable bind mounts: its dedicated state directory, the projects folder that contains this repo (for example `~/Projects`), and an export directory. The projects tree is available at `/workspace/projects`, including all of its files and subdirectories. The rest of the host home directory, browser profile, SSH directory, and existing Hermes/Codex installations are not mounted.
 
 The container is the primary security boundary. Prompt rules, tool allowlists, and approval prompts are additional safeguards, not containment boundaries.
 
