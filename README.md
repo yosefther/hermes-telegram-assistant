@@ -1,79 +1,67 @@
-# Secure Hermes Personal Assistant
+# hermes-telegram-assistant
 
-This deployment runs the official Hermes Agent image in rootless Podman with `/home/user/Projects` mounted read/write at `/workspace/projects`. Hermes starts in `/workspace/projects/personal assesteant` and can work with every file and directory below the projects root. The rest of the host home directory remains unavailable. Telegram is the primary interface. Discord and email remain disabled until their approval and identity controls are completed.
+My setup for running [Hermes Agent](https://hermes-agent.nousresearch.com/) as a personal assistant I talk to over Telegram. It runs the official Hermes image in rootless Podman and can work on files in my projects folder, but nothing else in my home directory.
 
-## Initial setup
+## How to run it
 
-Run these commands from this directory:
+You need Ubuntu/Debian (the install script uses `apt-get`), a Telegram bot token and an OpenAI account for Codex OAuth.
 
 ```bash
-./scripts/install-prerequisites.sh
-./scripts/bootstrap.sh
-./scripts/secure-telegram-setup.sh
-./scripts/auth-codex.sh
+./scripts/install-prerequisites.sh   # podman, uidmap, ffmpeg etc. Asks for sudo once
+./scripts/bootstrap.sh               # data dir, config, pulls the image, enables the user service
+./scripts/secure-telegram-setup.sh   # hidden token prompt, then locks the bot to your Telegram ID
+./scripts/auth-codex.sh              # device-code OAuth for Hermes and the Codex CLI
 ```
 
-The first command requests your sudo password locally. The Telegram token prompt is hidden. Codex uses device-code OAuth; never paste its cached credentials into chat.
-
-After authentication, perform foreground validation before starting the service:
+Check it in the foreground first, then start the gateway:
 
 ```bash
 ./scripts/container-command.sh hermes doctor
 ./scripts/container-command.sh hermes
-```
-
-Then start the gateway:
-
-```bash
 systemctl --user start hermes-assistant.service
 ```
 
-After upgrading an existing single-project installation, run `./scripts/bootstrap.sh` once to migrate the saved terminal working directory, then restart the service. Bootstrap keeps all other existing Hermes configuration values.
-
-## Operations
+Day to day:
 
 ```bash
 systemctl --user status hermes-assistant.service
-systemctl --user stop hermes-assistant.service
-systemctl --user restart hermes-assistant.service
 journalctl --user -u hermes-assistant.service -f
 ./scripts/emergency-stop.sh
 ```
 
-## Update
+Updating is manual: `podman pull docker.io/nousresearch/hermes-agent:latest`, then restart the service. Back up `~/.local/share/hermes-assistant` with the service stopped. That folder has credentials in it, so encrypt the backup.
 
-Updates are manual and require confirmation:
+If Podman complains about UID maps, check that `uidmap` is installed and that `/etc/subuid` and `/etc/subgid` have a range for your user.
 
-```bash
-podman pull docker.io/nousresearch/hermes-agent:latest
-systemctl --user restart hermes-assistant.service
-```
+## How it works
 
-Review release notes and back up first. Do not update while an agent or Codex task is running.
+There's no application code here, only config and shell scripts around the upstream image.
 
-## Backup and restore
+- `scripts/run-container.sh` is what the systemd unit runs. It starts `hermes gateway run` in Podman with the mounts and limits below.
+- `scripts/container-command.sh` runs one-off commands (`hermes doctor`, `codex login status`) in the same container setup.
+- `config/hermes-config.yaml` sets the model (OpenAI Codex), the toolsets per platform, memory, and limits on turns, tool calls and tool-failure loops.
+- `AGENTS.md` holds the rules the agent and any delegated Codex session follow: what it can do freely, and what needs my explicit approval each time (sending messages, commits, pushes, deploys, destructive commands).
 
-Stop the service before backup:
+## Security
 
-```bash
-systemctl --user stop hermes-assistant.service
-tar --create --gzip --file "$HOME/hermes-assistant-backup.tgz" --directory "${XDG_DATA_HOME:-$HOME/.local/share}" hermes-assistant
-```
+The container is the real boundary. Prompt rules and approval prompts are extra layers on top. More detail in [SECURITY.md](SECURITY.md).
 
-The archive contains credentials and must be encrypted and protected like a password. Restore only into `~/.local/share/hermes-assistant` while the service is stopped, then restore directory/file modes before starting.
+- **Rootless Podman.** Runs in a user namespace (`--userns=keep-id`) with `--cap-drop=ALL`, only the few capabilities the image needs at init, `no-new-privileges`, 1 CPU, 5 GB memory and 256 processes.
+- **One projects folder.** Only the folder that contains this repo (`~/Projects` for me) is mounted read/write (as `/workspace/projects`), plus the assistant's own data and export folders. The rest of `$HOME`, `~/.ssh`, browser profiles and any host Hermes/Codex installs are not mounted.
+- **systemd user service.** `hermes-assistant.service` runs as my user, not root, always restarts (`Restart=always`) and logs to journald. Lingering keeps it up after reboot.
+- **Emergency stop.** `./scripts/emergency-stop.sh` stops the service and the container. `systemctl --user disable hermes-assistant.service` keeps it from coming back.
+- **Credentials.** Everything lives in `~/.local/share/hermes-assistant/` (`.env` and `auth.json` are `0600`, the Codex dir is `0700`). The Telegram token is read with a hidden prompt and never printed. OAuth uses device codes. Nothing secret goes in the repo. `.env.example` only lists empty variable names.
+- **Telegram lockdown.** Deny by default, allowed for one numeric user ID found during setup. Messages from anyone else are ignored and pairing is off.
 
-## Troubleshooting
+## Tests
 
-```bash
-podman ps --all --filter name=hermes-assistant
-podman logs hermes-assistant
-./scripts/container-command.sh hermes doctor
-./scripts/container-command.sh hermes auth status openai-codex
-./scripts/container-command.sh codex login status
-```
+There's no automated test suite. [TESTING.md](TESTING.md) is a manual checklist with the current status of each capability. Container isolation, service restart and the credential scan pass. Most end-to-end messaging checks are still marked BLOCKED.
 
-If rootless Podman reports UID-map errors, verify `uidmap` is installed and `/etc/subuid` and `/etc/subgid` contain ranges for your account. If the user service cannot start after reboot, verify `loginctl show-user "$USER" -p Linger` reports `yes`.
+## Limitations
 
-## Current completion state
+- Everything next to this repo in its parent folder is visible to the agent, so keep that folder to projects only.
+- Discord and email are configured but turned off until their approval checks are verified.
 
-See [TESTING.md](TESTING.md). No capability is considered complete until its corresponding test has been executed successfully.
+## License
+
+MIT. See [LICENSE](LICENSE).
